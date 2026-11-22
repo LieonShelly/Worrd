@@ -4,6 +4,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/macOS-14%2B-181917?style=flat-square&logo=apple&logoColor=white" alt="macOS 14+">
+  <a href="https://github.com/LieonShelly/Worrd/releases/latest"><img src="https://img.shields.io/github/v/release/LieonShelly/Worrd?style=flat-square&color=2E6B4F&label=release" alt="最新版本"></a>
   <img src="https://img.shields.io/badge/UI-SwiftUI%20%2B%20AppKit-F05138?style=flat-square" alt="Swift">
   <img src="https://img.shields.io/badge/%E8%AF%8D%E5%85%B8-%E7%89%9B%E6%B4%A5%E8%8B%B1%E6%B1%89%E6%B1%89%E8%8B%B1-2E6B4F?style=flat-square" alt="牛津英汉汉英">
   <img src="https://img.shields.io/badge/%E6%95%B0%E6%8D%AE-%E4%BB%85%E6%9C%AC%E5%9C%B0-2E6B4F?style=flat-square" alt="数据仅本地">
@@ -12,6 +13,12 @@
 
 <p align="center">
   <sub>Look up words from Spotlight. Build a wordbook without trying.</sub>
+</p>
+
+<p align="center">
+  <a href="https://github.com/LieonShelly/Worrd/releases/latest">
+    <img src="https://img.shields.io/badge/%E2%AC%87%20%E4%B8%8B%E8%BD%BD%200.0.1-2E6B4F?style=for-the-badge" alt="下载 Worrd 0.0.1">
+  </a>
 </p>
 
 ---
@@ -88,7 +95,22 @@ Worrd 把这段压缩成一次回车：
 
 ## 安装
 
-目前只提供源码构建（还没做签名和公证的分发包）。
+### 直接下载（推荐）
+
+从 [Releases](https://github.com/LieonShelly/Worrd/releases/latest) 下载最新版 zip（当前 `0.0.1`，通用二进制，Intel / Apple Silicon 都能跑），解压后把 `Worrd.app` 拖进「应用程序」。
+
+应用是 **ad-hoc 签名、未做公证**，首次打开会被 Gatekeeper 拦下，任选一种方式放行：
+
+- 右键 `Worrd.app` → 打开 → 再点「打开」
+- 或者终端执行一次：
+
+```bash
+xattr -dr com.apple.quarantine /Applications/Worrd.app
+```
+
+装好后菜单栏会出现一个 `w` 图标，没有 Dock 图标。系统词典里需要保留《牛津英汉汉英词典》（多数 macOS 预装，若删掉了可在「词典」App 里重新下载）。
+
+### 从源码构建
 
 **环境要求**：macOS 14+、Xcode 或 Command Line Tools、[xcodegen](https://github.com/yonaskolb/XcodeGen)。
 
@@ -101,8 +123,6 @@ cd worrd/spike
 make install
 open ~/Applications/Worrd.app
 ```
-
-装好后菜单栏会出现一个 `w` 图标，没有 Dock 图标。系统词典里需要保留《牛津英汉汉英词典》（多数 macOS 预装，若删掉了可在「词典」App 里重新下载）。
 
 ## 使用
 
@@ -148,7 +168,7 @@ macOS 只认 App 的 Info.plist 里声明过的 scheme，运行时无法直接�
 
 ## 已知限制
 
-- 个人项目，源码构建，未签名公证；暂无发布包
+- 个人项目，ad-hoc 签名、未公证，首次打开需要手动放行
 - Spotlight 没有实时预览，必须按回车才会出结果
 - AI 兜底需要联网和 Key，通常 2–5 秒
 - 自定义前缀会在 `~/Applications/WorrdAliases` 留一个小 App，建议只留常用的几个
