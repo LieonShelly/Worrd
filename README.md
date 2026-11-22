@@ -7,6 +7,7 @@
   <img src="https://img.shields.io/badge/UI-SwiftUI%20%2B%20AppKit-F05138?style=flat-square" alt="Swift">
   <img src="https://img.shields.io/badge/%E8%AF%8D%E5%85%B8-%E7%89%9B%E6%B4%A5%E8%8B%B1%E6%B1%89%E6%B1%89%E8%8B%B1-2E6B4F?style=flat-square" alt="牛津英汉汉英">
   <img src="https://img.shields.io/badge/%E6%95%B0%E6%8D%AE-%E4%BB%85%E6%9C%AC%E5%9C%B0-2E6B4F?style=flat-square" alt="数据仅本地">
+  <a href="https://www.bilibili.com/video/BV1GLy7zwEyu/"><img src="https://img.shields.io/badge/%E6%BC%94%E7%A4%BA%E8%A7%86%E9%A2%91-Bilibili-00A1D6?style=flat-square&logo=bilibili&logoColor=white" alt="演示视频"></a>
 </p>
 
 <p align="center">
@@ -26,6 +27,16 @@ Worrd 把这段压缩成一次回车：
 ```
 
 释义浮窗立刻出现，同时这个词已经被记进本地单词本。查得越多，生词库越完整。
+
+## 演示视频
+
+<p align="center">
+  <a href="https://www.bilibili.com/video/BV1GLy7zwEyu/">
+    <img src="docs/video-cover.jpg" width="720" alt="Worrd 演示视频">
+  </a>
+</p>
+
+<p align="center"><sub>▶ 在 Bilibili 观看 90 秒演示：Spotlight 取词、AI 兜底、单词本。</sub></p>
 
 ## 功能
 
