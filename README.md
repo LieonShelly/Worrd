@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/user-attachments/files/35236719/Worrd.2026-11-22.23-55-05.zip">
+  <a href="https://github.com/LieonShelly/Worrd/releases/latest">
     <img src="https://img.shields.io/badge/%E2%AC%87%20%E4%B8%8B%E8%BD%BD%200.0.1-2E6B4F?style=for-the-badge" alt="下载 Worrd 0.0.1">
   </a>
 </p>
@@ -95,9 +95,11 @@ Worrd 把这段压缩成一次回车：
 
 ## 安装
 
-### 直接下载（推荐）
+### 从 Release 下载（推荐）
 
-[下载 0.0.1 安装包](https://github.com/user-attachments/files/35236719/Worrd.2026-11-22.23-55-05.zip)（也可以在 [Releases](https://github.com/LieonShelly/Worrd/releases/latest) 页面找到），解压后把 `Worrd.app` 拖进「应用程序」。通用二进制，Intel / Apple Silicon 都能跑。
+打开本仓库的 [Releases](https://github.com/LieonShelly/Worrd/releases/latest) 页面（仓库首页右侧的 **Releases** 区块也能点进去），在最新版本 `0.0.1` 里下载安装包 zip，解压后把 `Worrd.app` 拖进「应用程序」。通用二进制，Intel / Apple Silicon 都能跑。
+
+不想跳转的话，也可以直接下载：[zip 安装包](https://github.com/user-attachments/files/35236719/Worrd.2026-11-22.23-55-05.zip)。
 
 应用是 **ad-hoc 签名、未做公证**，首次打开会被 Gatekeeper 拦下，任选一种方式放行：
 
