@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; }
+  .banner {
+    width: 1200px; height: 630px; box-sizing: border-box;
+    background: #F2F0E7;
+    display: flex; align-items: center; gap: 76px;
+    padding: 0 96px;
+    position: relative; overflow: hidden;
+    font-family: -apple-system, "PingFang SC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .glow {
+    position: absolute; width: 760px; height: 760px; border-radius: 50%;
+    right: -220px; top: -260px;
+    background: radial-gradient(circle, rgba(46,107,79,.10), rgba(46,107,79,0) 68%);
+  }
+  .icon-wrap {
+    width: 264px; height: 264px; flex: none; position: relative;
+    border-radius: 59px; overflow: hidden;
+    box-shadow: 0 22px 34px rgba(30, 40, 32, .18);
+  }
+  .icon-wrap img { width: 100%; height: 100%; display: block; }
+  .text { position: relative; }
+  .word {
+    font-family: "New York", ui-serif, Georgia, serif;
+    font-size: 138px; font-weight: 600; letter-spacing: -0.03em; line-height: .92;
+    color: #181917;
+  }
+  .tagline {
+    margin-top: 26px;
+    font-size: 33px; line-height: 1.42; font-weight: 500;
+    color: #3F413C;
+    letter-spacing: .01em;
+  }
+  .rule {
+    width: 64px; height: 4px; border-radius: 2px; background: #2E6B4F;
+    margin: 30px 0 16px;
+  }
+  .meta {
+    font-size: 19px; letter-spacing: .06em; color: #2E6B4F; font-weight: 500;
+  }
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="glow"></div>
+    <div class="icon-wrap"><img src="icon.png" alt=""></div>
+    <div class="text">
+      <div class="word">Worrd</div>
+      <div class="tagline">在 Spotlight 里查词，<br>自动攒成你的单词本。</div>
+      <div class="rule"></div>
+      <div class="meta">macOS · 离线牛津词典 · AI 兜底</div>
+    </div>
+  </div>
+</body>
+</html>

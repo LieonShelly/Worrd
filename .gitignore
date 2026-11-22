@@ -1,0 +1,8 @@
+.DS_Store
+
+# Xcode build products (xcodegen regenerates the project from project.yml)
+spike/build/
+spike/Worrd.xcodeproj/
+xcuserdata/
+*.xcuserstate
+DerivedData/

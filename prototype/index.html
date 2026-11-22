@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Worrd · UI 原型</title>
+<style>
+  /* ---------- tokens ---------- */
+  :root{
+    --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "PingFang SC", sans-serif;
+    --serif: "New York", ui-serif, Georgia, "Songti SC", "STSong", serif;
+    --mono: "SF Mono", ui-monospace, Menlo, monospace;
+    --shadow-panel: 0 30px 70px -18px rgba(0,0,0,.38), 0 0 0 .5px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.05);
+    --r: 14px;
+  }
+  html[data-theme="light"]{
+    --paper:#FBFBF8; --surface:#FFFFFF; --surface-2:#F5F4EF; --surface-3:#EFEEE8;
+    --ink:#181917; --ink-2:#50524D; --muted:#71726B;
+    --line:rgba(22,24,20,.10); --line-2:rgba(22,24,20,.055);
+    --accent:#2E6B4F; --accent-ink:#245540; --accent-soft:rgba(46,107,79,.075);
+    --amber:#98661D;
+    --stage: radial-gradient(130% 100% at 50% 0%, #F4F3ED 0%, #E9E7DF 52%, #DFDCD3 100%);
+    --win: rgba(255,255,255,.82);
+    --row-on: rgba(46,107,79,.085);
+    --shadow-win: 0 34px 80px -24px rgba(0,0,0,.35), 0 0 0 .5px rgba(0,0,0,.12);
+  }
+  html[data-theme="dark"]{
+    --paper:#151514; --surface:#232322; --surface-2:#2B2B29; --surface-3:#333331;
+    --ink:#F2F1EC; --ink-2:#C7C5BD; --muted:#9A988F;
+    --line:rgba(255,255,255,.11); --line-2:rgba(255,255,255,.06);
+    --accent:#8FC3A6; --accent-ink:#A9D7BE; --accent-soft:rgba(143,195,166,.12);
+    --amber:#D6A459;
+    --stage: radial-gradient(130% 100% at 50% 0%, #232322 0%, #191918 55%, #0F0F0E 100%);
+    --win: rgba(35,35,34,.88);
+    --row-on: rgba(143,195,166,.10);
+    --shadow-win: 0 34px 80px -24px rgba(0,0,0,.8), 0 0 0 .5px rgba(255,255,255,.12);
+    --shadow-panel: 0 30px 70px -18px rgba(0,0,0,.75), 0 0 0 .5px rgba(255,255,255,.13);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:var(--ui); color:var(--ink);
+    background: var(--stage); background-attachment: fixed;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  button{font-family:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer}
+  input{font-family:inherit; color:inherit; background:none; border:0; outline:none}
+  ::selection{background: color-mix(in srgb, var(--accent) 24%, transparent)}
+  :focus-visible{outline:2px solid color-mix(in srgb, var(--accent) 70%, transparent); outline-offset:2px; border-radius:6px}
+
+  /* ---------- chrome / proto bar ---------- */
+  .bar{
+    position:sticky; top:0; z-index:20;
+    height:56px; display:flex; align-items:center; gap:18px; padding:0 22px;
+    background: color-mix(in srgb, var(--surface) 74%, transparent);
+    backdrop-filter: blur(18px) saturate(160%);
+    border-bottom:1px solid var(--line-2);
+  }
+  .brand{display:flex; align-items:center; gap:10px; min-width:150px}
+  .logo{
+    width:26px; height:26px; border-radius:8px; display:grid; place-items:center;
+    background:var(--ink); color:var(--paper);
+    font-family:var(--serif); font-size:17px; font-style:italic; line-height:1; padding-bottom:1px;
+  }
+  .brand b{display:block; font-size:13px; font-weight:600; letter-spacing:.01em}
+  .brand span{display:block; font-size:10.5px; color:var(--muted); letter-spacing:.02em}
+
+  .tabs{display:flex; gap:2px; padding:3px; border-radius:10px; background:var(--surface-2); border:1px solid var(--line-2)}
+  .tabs button{
+    padding:5px 12px; border-radius:7px; font-size:12.5px; color:var(--ink-2);
+    transition: background .18s ease, color .18s ease;
+  }
+  .tabs button:hover{color:var(--ink)}
+  .tabs button.on{background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08), 0 0 0 .5px var(--line)}
+
+  .bar-right{margin-left:auto; display:flex; align-items:center; gap:10px}
+  .states{display:flex; gap:2px; padding:3px; border-radius:9px; background:var(--surface-2); border:1px solid var(--line-2); transition:opacity .2s}
+  .states button{padding:4px 9px; border-radius:6px; font-size:11.5px; color:var(--muted); white-space:nowrap; transition:all .16s}
+  .states button:hover{color:var(--ink-2)}
+  .states button.on{background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.07)}
+  body:not([data-view="lookup"]) .states{opacity:0; pointer-events:none}
+  .theme-btn{width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:var(--ink-2); border:1px solid var(--line-2); background:var(--surface-2); transition:all .16s}
+  .theme-btn:hover{color:var(--ink); background:var(--surface)}
+  .ic-moon{display:none}
+  html[data-theme="dark"] .ic-sun{display:none}
+  html[data-theme="dark"] .ic-moon{display:block}
+
+  /* ---------- stage ---------- */
+  .stage{padding:40px 28px 56px; display:grid; justify-items:center; align-content:center; gap:14px; min-height:calc(100vh - 56px)}
+  .view{display:none; justify-items:center; gap:14px; width:100%}
+  body[data-view="lookup"] #view-lookup,
+  body[data-view="wordbook"] #view-wordbook,
+  body[data-view="settings"] #view-settings,
+  body[data-view="flow"] #view-flow{display:grid}
+  .caption{font-size:11px; color:var(--muted); letter-spacing:.02em; text-align:center; max-width:640px; line-height:1.6}
+  .caption b{color:var(--ink-2); font-weight:500}
+
+  /* ---------- lookup panel ---------- */
+  .panel{
+    width:540px; border-radius:var(--r); overflow:hidden;
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    backdrop-filter: blur(26px) saturate(170%);
+    box-shadow: var(--shadow-panel);
+    border:1px solid var(--line-2);
+    animation: pop .3s cubic-bezier(.2,.9,.25,1);
+  }
+  @keyframes pop{from{opacity:0; transform:translateY(8px) scale(.985)} to{opacity:1; transform:none}}
+  @media (prefers-reduced-motion: reduce){ .panel{animation:none} *{transition-duration:.01ms !important; animation-duration:.01ms !important} }
+
+  .panel-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:20px 22px 12px}
+  .headword{
+    margin:0; font-family:var(--serif); font-weight:600; font-size:34px; line-height:1.02;
+    letter-spacing:-.018em;
+  }
+  .phon{display:flex; align-items:center; gap:6px; margin-top:9px; color:var(--muted); font-size:12px}
+  .phon .tag{font-size:9.5px; letter-spacing:.06em; padding:1px 4px; border:1px solid var(--line); border-radius:4px; color:var(--muted)}
+  .phon .ipa{font-family:var(--mono); font-size:12px; color:var(--ink-2); letter-spacing:-.01em}
+  .phon.sw-zh .ipa{font-family:var(--serif); font-size:14px; letter-spacing:.01em}
+  .speak{
+    width:24px; height:24px; border-radius:6px; display:grid; place-items:center; color:var(--muted);
+    margin-left:2px; transition:all .16s;
+  }
+  .speak:hover{color:var(--accent-ink); background:var(--accent-soft)}
+
+  .head-actions{display:flex; align-items:center; gap:8px; padding-top:3px}
+  .badge{
+    display:inline-flex; align-items:center; gap:5px; white-space:nowrap;
+    font-size:10.5px; padding:2px 7px; border-radius:999px;
+    background:var(--accent-soft); color:var(--accent-ink);
+    border:1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .badge::before{content:""; width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.85}
+  .badge.load-b{background:var(--surface-2); color:var(--muted); border-color:var(--line)}
+  .badge.empty-b{background:rgba(152,102,29,.09); color:var(--amber); border-color:color-mix(in srgb, var(--amber) 22%, transparent)}
+  .load-b,.empty-b{display:none}
+  .close{width:26px; height:26px; border-radius:7px; display:grid; place-items:center; color:var(--muted); transition:all .16s}
+  .close:hover{background:var(--surface-2); color:var(--ink)}
+
+  /* state switch */
+  .panel[data-state="loading"] .ok-b{display:none}
+  .panel[data-state="loading"] .load-b{display:inline-flex}
+  .panel[data-state="empty"] .ok-b{display:none}
+  .panel[data-state="empty"] .empty-b{display:inline-flex}
+  .panel[data-state="loading"] .phon,
+  .panel[data-state="empty"] .phon{display:none}
+  .panel[data-state="loading"] .entry,
+  .panel[data-state="loading"] .ai,
+  .panel[data-state="loading"] .panel-foot,
+  .panel[data-state="empty"] .entry,
+  .panel[data-state="empty"] .ai{display:none}
+  .panel[data-state="loading"] .skel{display:block}
+  .panel[data-state="empty"] .empty{display:flex}
+  .status.foot-empty{display:none; color:var(--muted)}
+  .panel[data-state="empty"] .status.foot-empty{display:flex}
+  .panel[data-state="empty"] .hint-actions{display:none}
+  .panel[data-state="empty"] .status.sw-en,
+  .panel[data-state="empty"] .status.sw-zh{display:none}
+  .skel,.empty,.foot-empty{display:none}
+  .panel[data-state="ai-loading"] .ai-body{display:none}
+  .panel[data-state="ai-loading"] .ai-skel{display:flex}
+
+  /* headword switch */
+  .hw-zh,.hw-empty{display:none}
+  .panel[data-state="ok-zh"] .hw-en{display:none}
+  .panel[data-state="ok-zh"] .hw-zh{display:inline}
+  .panel[data-state="empty"] .hw-en{display:none}
+  .panel[data-state="empty"] .hw-empty{display:inline}
+
+  /* language switch */
+  .panel[data-state="ok-zh"] .sw-en{display:none}
+  .panel:not([data-state="ok-zh"]) .sw-zh{display:none}
+
+  /* entry */
+  .entry{padding:6px 22px 4px}
+  .pos-block{display:grid; grid-template-columns:26px 1fr; gap:4px; margin-bottom:15px}
+  .pos{font-family:var(--mono); font-size:11px; color:var(--accent); padding-top:4px; letter-spacing:.02em}
+  .pos-block:last-child{margin-bottom:2px}
+  .senses{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px}
+  .sense{display:grid; grid-template-columns:16px 1fr; gap:2px}
+  .num{font-size:11px; color:var(--muted); padding-top:3px; font-variant-numeric:tabular-nums}
+  .gloss{margin:0; font-size:15.5px; line-height:1.5; color:var(--ink); letter-spacing:.005em}
+  .gloss .cue{color:var(--muted); font-size:13px; margin-right:3px}
+  .py{color:var(--muted); font-size:11.5px; margin-left:5px; letter-spacing:.02em}
+  .ex{margin:4px 0 0; font-size:13px; line-height:1.55; color:var(--ink-2); display:flex; gap:6px}
+  .ex .arrow{color:var(--muted); font-size:10px; line-height:1.9; flex:none}
+  .ex .zh{color:var(--muted)}
+  .source{margin:14px 0 2px; text-align:right; font-size:10px; color:var(--muted); letter-spacing:.03em}
+
+  /* skeleton */
+  .skel{padding:8px 22px 20px; flex-direction:column; gap:9px}
+  .panel[data-state="loading"] .skel{display:flex}
+  .sk-group{display:flex; flex-direction:column; gap:8px; margin:4px 0 6px}
+  .sk-box{height:86px; border-radius:11px; background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 12%, transparent); margin-top:4px}
+  .w55{width:55%} .w40{width:40%} .w80{width:80%}
+  .sk-line{height:12px; border-radius:6px; margin:11px 0;
+    background:linear-gradient(90deg, var(--line-2) 25%, color-mix(in srgb, var(--ink) 7%, transparent) 37%, var(--line-2) 63%);
+    background-size:400% 100%; animation:shimmer 1.5s infinite}
+  .sk-line.w70{width:70%} .sk-line.w45{width:45%} .sk-line.w88{width:88%}
+  @keyframes shimmer{0%{background-position:100% 0} 100%{background-position:0 0}}
+
+  /* empty */
+  .empty{padding:34px 24px 30px; flex-direction:column; align-items:center; text-align:center; gap:4px}
+  .empty-ico{width:38px; height:38px; border-radius:11px; display:grid; place-items:center; background:var(--surface-2); color:var(--muted); margin-bottom:8px}
+  .empty-title{margin:0; font-size:15px; font-weight:600}
+  .empty-sub{margin:0; font-size:12.5px; color:var(--muted); line-height:1.6}
+  .chips{display:flex; gap:6px; align-items:center; margin-top:14px; flex-wrap:wrap; justify-content:center}
+  .chips span{font-size:11px; color:var(--muted); margin-right:2px}
+  .chips button{font-size:11.5px; padding:3px 9px; border-radius:999px; border:1px solid var(--line); color:var(--ink-2); background:var(--surface); transition:all .16s}
+  .chips button:hover{border-color:color-mix(in srgb, var(--accent) 40%, transparent); color:var(--accent-ink)}
+
+  /* AI block */
+  .ai{
+    margin:14px 14px 13px; padding:11px 13px 12px; border-radius:11px;
+    background:var(--accent-soft);
+    border:1px solid color-mix(in srgb, var(--accent) 13%, transparent);
+  }
+  .ai-head{display:flex; align-items:center; gap:5px; font-size:10px; font-weight:600; letter-spacing:.07em; color:var(--accent-ink); text-transform:uppercase}
+  .ai-model{margin-left:auto; font-weight:400; letter-spacing:.02em; text-transform:none; font-size:9.5px; color:var(--muted); font-family:var(--mono)}
+  .ai-body p{margin:7px 0 0; font-size:12px; line-height:1.62; color:var(--ink-2)}
+  .ai-k{display:inline-block; font-size:9.5px; color:var(--accent-ink); background:color-mix(in srgb, var(--accent) 12%, transparent); border-radius:4px; padding:0 4px; margin-right:5px; letter-spacing:.04em; vertical-align:1px}
+  .ai-body em{font-style:normal; color:var(--ink)}
+  .ai-skel{display:none; flex-direction:column; gap:7px; padding-top:8px; min-height:56px}
+  .ai-skel .sk-line{height:10px; margin:0}
+  .ai-skel .sk-line:nth-child(1){width:92%}
+  .ai-skel .sk-line:nth-child(2){width:76%}
+
+  /* footer */
+  .panel-foot{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:9px 16px; border-top:1px solid var(--line-2);
+    background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+    font-size:11px; color:var(--muted);
+  }
+  .status{display:flex; align-items:center; gap:6px; color:var(--accent-ink)}
+  .status svg{flex:none}
+  .status .sep{color:var(--muted); margin:0 1px}
+  .status .dim{color:var(--muted)}
+  .hint{display:flex; align-items:center; gap:5px; white-space:nowrap; color:var(--muted)}
+  kbd{
+    font-family:var(--ui); font-size:10px; line-height:1; padding:2px 4px; border-radius:4px;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    box-shadow:0 1px 0 var(--line-2);
+  }
+
+  /* ---------- wordbook window ---------- */
+  .window{
+    width:1120px; max-width:100%; border-radius:13px; overflow:hidden;
+    background:var(--win); backdrop-filter: blur(30px) saturate(170%);
+    box-shadow: var(--shadow-win); border:1px solid var(--line-2);
+  }
+  .titlebar{position:relative; height:40px; display:flex; align-items:center; padding:0 14px; border-bottom:1px solid var(--line-2); background: color-mix(in srgb, var(--surface-2) 45%, transparent)}
+  .lights{display:flex; gap:8px}
+  .light{width:12px; height:12px; border-radius:50%; border:.5px solid rgba(0,0,0,.1)}
+  .light.r{background:#FF5F57} .light.y{background:#FEBC2E} .light.g{background:#28C840}
+  .titlebar .t{position:absolute; left:50%; transform:translateX(-50%); font-size:12.5px; color:var(--muted); font-weight:500}
+  .wb-body{display:grid; grid-template-columns:196px 372px minmax(0,1fr); height:676px}
+
+  .sidebar{border-right:1px solid var(--line-2); padding:10px 8px; display:flex; flex-direction:column; gap:2px; background: color-mix(in srgb, var(--surface-2) 35%, transparent)}
+  .side-label{font-size:10px; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; padding:8px 9px 5px}
+  .side-item{display:flex; align-items:center; gap:8px; width:100%; padding:6px 9px; border-radius:7px; font-size:13px; color:var(--ink-2); text-align:left; transition:all .14s}
+  .side-item svg{opacity:.75; flex:none}
+  .side-item:hover{background:var(--surface-2)}
+  .side-item.on{background:var(--accent-soft); color:var(--accent-ink); font-weight:500}
+  .side-item .n{margin-left:auto; font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums}
+  .side-foot{margin-top:auto; padding:10px 10px 6px; border-top:1px solid var(--line-2); font-size:11px; color:var(--muted); line-height:1.7}
+  .side-foot b{color:var(--ink-2); font-weight:600}
+
+  .list-pane{border-right:1px solid var(--line-2); display:flex; flex-direction:column; min-width:0}
+  .list-head{padding:10px; display:flex; gap:8px; align-items:center; border-bottom:1px solid var(--line-2)}
+  .search{flex:1; display:flex; align-items:center; gap:6px; height:28px; padding:0 8px; border-radius:7px; background:var(--surface-2); border:1px solid var(--line-2); color:var(--muted)}
+  .search input{flex:1; min-width:0; font-size:12.5px}
+  .search input::placeholder{color:var(--muted)}
+  .sort{height:28px; padding:0 8px; border-radius:7px; border:1px solid var(--line-2); background:var(--surface-2); font-size:11.5px; color:var(--ink-2); display:flex; align-items:center; gap:3px; white-space:nowrap}
+  .sort:hover{color:var(--ink)}
+  .rows{overflow:auto; flex:1}
+  .row{
+    display:block; width:100%; text-align:left; padding:10px 14px 11px;
+    border-bottom:1px solid var(--line-2); transition:background .14s;
+  }
+  .row:hover{background:color-mix(in srgb, var(--surface-2) 70%, transparent)}
+  .row.on{background:var(--row-on)}
+  .row-top{display:flex; align-items:baseline; gap:7px}
+  .rw{font-family:var(--serif); font-size:16px; font-weight:600; letter-spacing:-.005em; color:var(--ink)}
+  .ripa{font-family:var(--mono); font-size:10.5px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .rc{margin-left:auto; font-size:10px; color:var(--muted); font-variant-numeric:tabular-nums; flex:none}
+  .rgloss{display:block; margin-top:2px; font-size:12px; color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+  .detail{overflow:auto; padding:26px 28px 24px; min-width:0}
+  .d-word{margin:0; font-family:var(--serif); font-size:30px; font-weight:600; letter-spacing:-.015em; line-height:1.05}
+  .d-phon{display:flex; align-items:center; gap:7px; margin-top:7px; font-family:var(--mono); font-size:12px; color:var(--muted)}
+  .d-meta{margin-top:12px; font-size:11px; color:var(--muted); display:flex; gap:7px; flex-wrap:wrap}
+  .d-meta .dot{opacity:.5}
+  .d-senses{margin-top:18px; display:flex; flex-direction:column; gap:10px}
+  .d-sense{display:grid; grid-template-columns:26px 1fr; gap:4px}
+  .d-sense p{margin:0; font-size:14px; line-height:1.6; color:var(--ink-2)}
+  .d-sense p .en{color:var(--ink)}
+  .d-note{margin-top:22px; padding:12px 13px; border-radius:10px; background:var(--surface-2); border:1px solid var(--line-2)}
+  .d-note-label{display:block; font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:5px}
+  .d-note p{margin:0; font-size:12.5px; line-height:1.65; color:var(--ink-2)}
+  .d-history{margin-top:22px}
+  .h-row{display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--line-2); font-size:11.5px; color:var(--ink-2)}
+  .h-row:last-child{border-bottom:0}
+  .h-t{font-variant-numeric:tabular-nums; color:var(--muted)}
+  .h-src{margin-left:auto; font-size:9.5px; letter-spacing:.04em; color:var(--accent-ink); background:var(--accent-soft); border-radius:4px; padding:1px 5px}
+  .d-actions{display:flex; gap:8px; margin-top:22px}
+  .btn{height:30px; padding:0 12px; border-radius:7px; font-size:12px; display:inline-flex; align-items:center; gap:6px;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-2); transition:all .16s}
+  .btn:hover{color:var(--ink); border-color:color-mix(in srgb, var(--ink) 20%, transparent)}
+  .btn.danger:hover{color:#C2412F; border-color:rgba(194,65,47,.35)}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+  .btn.primary:hover{filter:brightness(1.06); color:#fff}
+  html[data-theme="dark"] .btn.primary{color:#12211A}
+
+  /* ---------- settings ---------- */
+  .settings{width:720px; max-width:100%}
+  .set-body{padding:8px 26px 22px}
+  .group{margin-top:18px}
+  .group-title{font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); margin:0 0 6px 2px}
+  .group-box{border:1px solid var(--line-2); border-radius:10px; overflow:hidden; background:color-mix(in srgb, var(--surface) 60%, transparent)}
+  .set-row{display:grid; grid-template-columns:150px 1fr auto; gap:14px; align-items:center; padding:11px 14px; border-bottom:1px solid var(--line-2)}
+  .set-row:last-child{border-bottom:0}
+  .set-k{font-size:12.5px; color:var(--ink-2)}
+  .set-v{font-size:12.5px; color:var(--ink); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .set-v.mono{font-family:var(--mono); font-size:11.5px; color:var(--ink-2)}
+  .set-v .ok{display:inline-flex; align-items:center; gap:5px; color:var(--accent-ink); font-size:12px}
+  .set-v .ok::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--accent)}
+  .mono-inline{font-family:var(--mono); font-size:11.5px; color:var(--ink)}
+  .set-note{color:var(--muted)}
+  .set-foot{margin:16px 2px 0; font-size:10.5px; color:var(--muted); letter-spacing:.02em}
+  .switch{width:36px; height:21px; border-radius:999px; background:var(--accent); position:relative; flex:none; transition:background .2s}
+  .switch::after{content:""; position:absolute; top:2px; left:17px; width:17px; height:17px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.25); transition:left .2s}
+  .switch.off{background:var(--line)}
+  .switch.off::after{left:2px}
+
+  /* ---------- flow ---------- */
+  .flow{width:1080px; max-width:100%; display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+  .step{
+    background:color-mix(in srgb, var(--surface) 92%, transparent); border:1px solid var(--line-2);
+    border-radius:12px; padding:14px; box-shadow:0 10px 30px -18px rgba(0,0,0,.3);
+    display:flex; flex-direction:column; gap:11px; min-height:272px;
+  }
+  .step-no{font-family:var(--mono); font-size:10px; color:var(--accent); letter-spacing:.1em}
+  .step-t{font-size:13.5px; font-weight:600; margin:0}
+  .step-d{margin:0; font-size:11.5px; line-height:1.65; color:var(--muted)}
+  .mock{flex:1; border-radius:9px; background:var(--surface-2); border:1px solid var(--line-2); padding:12px; display:grid; place-items:center; min-height:132px}
+  .spot{width:100%; height:30px; border-radius:8px; background:var(--surface); border:1px solid var(--line); display:flex; align-items:center; gap:6px; padding:0 9px; font-size:11.5px; color:var(--muted); box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .spot .caret{width:1px; height:13px; background:var(--accent); animation:blink 1.1s step-end infinite}
+  @keyframes blink{50%{opacity:0}}
+  .sel-text{font-family:var(--serif); font-size:14px; line-height:1.8; color:var(--ink-2)}
+  .sel-text mark{background:color-mix(in srgb, var(--accent) 22%, transparent); color:var(--ink); border-radius:3px; padding:0 2px}
+  .keys{display:flex; gap:4px; align-items:center; justify-content:center; margin-top:8px; color:var(--muted); font-size:10px}
+  .keys kbd{font-size:10px; padding:2px 5px}
+  .mini-panel{width:100%; border-radius:9px; background:var(--surface); border:1px solid var(--line); padding:10px 11px; box-shadow:0 6px 18px -10px rgba(0,0,0,.3)}
+  .mini-word{font-family:var(--serif); font-size:17px; font-weight:600}
+  .mini-phon{font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:2px}
+  .mini-gloss{font-size:10.5px; color:var(--ink-2); margin-top:5px; line-height:1.5}
+  .mini-ai{margin-top:7px; font-size:9px; color:var(--accent-ink); background:var(--accent-soft); border-radius:5px; padding:3px 5px}
+  .mini-row{width:100%; display:flex; align-items:center; gap:7px; padding:5px 7px; border-radius:6px; font-size:11px}
+  .mini-row.on{background:var(--accent-soft); color:var(--accent-ink)}
+  .mini-row .k{margin-left:auto; font-size:9px; color:var(--muted); font-family:var(--mono)}
+  .mini-ico{width:16px; height:16px; border-radius:5px; background:var(--ink); color:var(--paper); display:grid; place-items:center; font-family:var(--serif); font-size:10px; font-style:italic; flex:none}
+  .mini-input{width:100%; height:24px; border-radius:6px; border:1px solid var(--line); background:var(--surface); display:flex; align-items:center; padding:0 7px; font-size:11px; color:var(--ink); margin-top:6px}
+
+  /* responsive */
+  @media (max-width:1180px){
+    .wb-body{grid-template-columns:176px 320px minmax(0,1fr)}
+    .flow{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width:860px){
+    .bar{flex-wrap:wrap; height:auto; padding:10px 14px; gap:10px}
+    .brand{min-width:0}
+    .states{display:none}
+    .wb-body{grid-template-columns:1fr; height:auto}
+    .sidebar,.list-pane{display:none}
+    .panel{width:100%; max-width:540px}
+    .stage{padding:24px 12px 50px}
+  }
+</style>
+</head>
+<body data-view="lookup">
+
+<header class="bar">
+  <div class="brand">
+    <div class="logo">w</div>
+    <div><b>Worrd</b><span>UI 原型 · v0.1</span></div>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="原型页面">
+    <button data-view="lookup" class="on">查词浮窗</button>
+    <button data-view="wordbook">单词本</button>
+    <button data-view="settings">设置</button>
+    <button data-view="flow">入口流程</button>
+  </nav>
+
+  <div class="bar-right">
+    <div class="states" id="states" role="group" aria-label="浮窗状态">
+      <button data-state="ok-en" class="on">正常</button>
+      <button data-state="ok-zh">中→英</button>
+      <button data-state="loading">查询中</button>
+      <button data-state="ai-loading">AI 加载</button>
+      <button data-state="empty">未收录</button>
+    </div>
+    <button class="theme-btn" id="theme" aria-label="切换明暗">
+      <svg class="ic-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.1 5.1l1.4 1.4M17.5 17.5l1.4 1.4M18.9 5.1l-1.4 1.4M6.5 17.5l-1.4 1.4"/></svg>
+      <svg class="ic-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="stage">
+
+  <!-- ================= LOOKUP ================= -->
+  <section class="view" id="view-lookup">
+    <article class="panel" id="panel" data-state="ok-en" aria-label="查词浮窗">
+
+      <div class="panel-head">
+        <div>
+          <h1 class="headword">
+            <span class="hw-en">theme</span>
+            <span class="hw-zh">主题</span>
+            <span class="hw-empty">worrd</span>
+          </h1>
+          <div class="phon sw-en">
+            <span class="tag">英</span><span class="ipa">θiːm</span>
+            <span class="tag">美</span><span class="ipa">θim</span>
+            <button class="speak" aria-label="朗读"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="M15.5 8.5a4.5 4.5 0 0 1 0 7"/><path d="M18.5 6a8 8 0 0 1 0 12"/></svg></button>
+          </div>
+          <div class="phon sw-zh">
+            <span class="ipa">zhǔ tí</span>
+            <span class="tag">名词</span>
+            <button class="speak" aria-label="朗读"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="M15.5 8.5a4.5 4.5 0 0 1 0 7"/><path d="M18.5 6a8 8 0 0 1 0 12"/></svg></button>
+          </div>
+        </div>
+        <div class="head-actions">
+          <span class="badge ok-b">已收录</span>
+          <span class="badge load-b">查询中</span>
+          <span class="badge empty-b">未收录</span>
+          <button class="close" aria-label="关闭"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+      </div>
+
+      <!-- English entry -->
+      <div class="entry sw-en">
+        <div class="pos-block">
+          <span class="pos">n.</span>
+          <ol class="senses">
+            <li class="sense">
+              <span class="num">①</span>
+              <div>
+                <p class="gloss"><span class="cue">(topic)</span>主题<span class="py">zhǔtí</span></p>
+                <p class="ex"><span class="arrow">▸</span><span>on the theme of … <span class="zh">关于…主题</span></span></p>
+                <p class="ex"><span class="arrow">▸</span><span>a theme bar / party <span class="zh">主题酒吧／聚会</span></span></p>
+              </div>
+            </li>
+            <li class="sense">
+              <span class="num">②</span>
+              <div>
+                <p class="gloss"><span class="cue">(musical motif)</span>主旋律<span class="py">zhǔxuánlǜ</span></p>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="pos-block">
+          <span class="pos">v.</span>
+          <ol class="senses">
+            <li class="sense">
+              <span class="num">①</span>
+              <div>
+                <p class="gloss">赋予…某种主题<span class="py">fùyǔ… mǒu zhǒng zhǔtí</span></p>
+                <p class="ex"><span class="arrow">▸</span><span>the park will be themed as a pirate stronghold <span class="zh">这个游乐园的主题将被定为海盗要塞</span></span></p>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <p class="source">牛津英汉汉英词典</p>
+      </div>
+
+      <!-- Chinese entry -->
+      <div class="entry sw-zh">
+        <div class="pos-block">
+          <span class="pos">名</span>
+          <ol class="senses">
+            <li class="sense">
+              <span class="num">①</span>
+              <div>
+                <p class="gloss">subject; topic</p>
+                <p class="ex"><span class="arrow">▸</span><span>紧扣主题 <span class="zh">stick to the topic</span></span></p>
+                <p class="ex"><span class="arrow">▸</span><span>谈话的主题 <span class="zh">the main theme of the talks</span></span></p>
+              </div>
+            </li>
+            <li class="sense">
+              <span class="num">②</span>
+              <div>
+                <p class="gloss">theme</p>
+                <p class="ex"><span class="arrow">▸</span><span>时代的两大主题 <span class="zh">two major issues of the day</span></span></p>
+              </div>
+            </li>
+          </ol>
+        </div>
+        <p class="source">牛津英汉汉英词典</p>
+      </div>
+
+      <!-- skeleton -->
+      <div class="skel">
+        <div class="sk-line w45"></div>
+        <div class="sk-group">
+          <div class="sk-line w88"></div>
+          <div class="sk-line w70"></div>
+          <div class="sk-line w55"></div>
+        </div>
+        <div class="sk-group">
+          <div class="sk-line w40"></div>
+          <div class="sk-line w80"></div>
+        </div>
+        <div class="sk-box"></div>
+      </div>
+
+      <!-- empty -->
+      <div class="empty">
+        <div class="empty-ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/><path d="M8.5 11h5"/></svg>
+        </div>
+        <p class="empty-title">没有找到 “worrd”</p>
+        <p class="empty-sub">牛津词典未收录，可能是拼写有误</p>
+        <div class="chips">
+          <span>相近词</span>
+          <button>word</button><button>world</button><button>sword</button>
+        </div>
+      </div>
+
+      <!-- AI -->
+      <section class="ai sw-en">
+        <div class="ai-head">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg>
+          <span>AI 补注</span>
+          <span class="ai-model">deepseek-chat</span>
+        </div>
+        <div class="ai-body">
+          <p><span class="ai-k">辨析</span>theme 指贯穿全篇的中心思想；topic 更中性，指具体话题；subject 偏正式，也可指学科。</p>
+          <p><span class="ai-k">搭配</span>theme song · theme park · on the theme of</p>
+          <p><span class="ai-k">例句</span><em>The theme of the conference is resilience.</em> 会议的主题是韧性。</p>
+        </div>
+        <div class="ai-skel">
+          <div class="sk-line"></div>
+          <div class="sk-line"></div>
+        </div>
+      </section>
+
+      <footer class="panel-foot">
+        <span class="status sw-en">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 4.5 4.5L19.5 6.5"/></svg>
+          已加入单词本 <span class="sep">·</span> <span class="dim">第 3 次查询</span> <span class="sep">·</span> <span class="dim">上次 12 天前</span>
+        </span>
+        <span class="status sw-zh">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 4.5 4.5L19.5 6.5"/></svg>
+          已加入单词本 <span class="sep">·</span> <span class="dim">第 1 次查询</span>
+        </span>
+        <span class="status foot-empty">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v5"/><path d="M12 16.5v.5"/><circle cx="12" cy="12" r="8.5"/></svg>
+          未加入单词本 <span class="sep">·</span> <span class="dim">本次查询不记录</span>
+        </span>
+        <span class="hint"><span class="hint-actions"><kbd>↵</kbd> 发音 <kbd>⌘D</kbd> 收藏 </span><kbd>esc</kbd> 关闭</span>
+      </footer>
+    </article>
+
+    <p class="caption"><b>查词浮窗</b> · 540pt · 内容自适应高度 · 回车朗读、⌘D 收藏、Esc 关闭 · 顶部状态可切换五种形态</p>
+  </section>
+
+  <!-- ================= WORDBOOK ================= -->
+  <section class="view" id="view-wordbook">
+    <div class="window">
+      <div class="titlebar">
+        <div class="lights"><span class="light r"></span><span class="light y"></span><span class="light g"></span></div>
+        <span class="t">单词本</span>
+      </div>
+      <div class="wb-body">
+        <aside class="sidebar">
+          <div class="side-label">词库</div>
+          <button class="side-item on"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>全部<span class="n">128</span></button>
+          <button class="side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="m12 3.8 2.5 5.1 5.6.8-4 4 .9 5.6-5-2.7-5 2.7.9-5.6-4-4 5.6-.8Z"/></svg>收藏<span class="n">18</span></button>
+          <button class="side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>最近 7 天<span class="n">12</span></button>
+          <button class="side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3 4 6 6.5 6 10a6 6 0 0 1-12 0c0-3.5 3-6 6-10Z"/></svg>生词<span class="n">31</span></button>
+          <div class="side-foot">共 <b>128</b> 词 · 本周新增 <b>12</b><br>143 次查询 · 1.2 MB</div>
+        </aside>
+
+        <div class="list-pane">
+          <div class="list-head">
+            <label class="search">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+              <input id="q" placeholder="搜索单词、释义或笔记" aria-label="搜索单词本">
+            </label>
+            <button class="sort" id="sortBtn">最近
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+          </div>
+          <div class="rows" id="rows"></div>
+        </div>
+
+        <div class="detail" id="detail"></div>
+      </div>
+    </div>
+    <p class="caption"><b>单词本</b> · 1120 × 676 · 三栏结构 · 列表可按最近／次数／字母排序，点击查看详情与笔记</p>
+  </section>
+
+  <!-- ================= SETTINGS ================= -->
+  <section class="view" id="view-settings">
+    <div class="window settings">
+      <div class="titlebar">
+        <div class="lights"><span class="light r"></span><span class="light y"></span><span class="light g"></span></div>
+        <span class="t">设置</span>
+      </div>
+      <div class="set-body">
+        <div class="group">
+          <p class="group-title">词典</p>
+          <div class="group-box">
+            <div class="set-row">
+              <span class="set-k">牛津英汉汉英词典</span>
+              <span class="set-v"><span class="ok">已就绪 · 双向查询</span></span>
+              <button class="btn">检查</button>
+            </div>
+            <div class="set-row">
+              <span class="set-k">词典位置</span>
+              <span class="set-v mono">/System/Library/AssetsV2/…/Simplified Chinese - English.dictionary</span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <p class="group-title">AI 增强</p>
+          <div class="group-box">
+            <div class="set-row">
+              <span class="set-k">启用</span>
+              <span class="set-v">在词典释义下方追加辨析、搭配与例句</span>
+              <button class="switch" aria-label="启用 AI 增强" aria-pressed="true"></button>
+            </div>
+            <div class="set-row">
+              <span class="set-k">接口</span>
+              <span class="set-v mono">https://api.deepseek.com/v1</span>
+              <span></span>
+            </div>
+            <div class="set-row">
+              <span class="set-k">模型</span>
+              <span class="set-v mono">deepseek-chat</span>
+              <span></span>
+            </div>
+            <div class="set-row">
+              <span class="set-k">API Key</span>
+              <span class="set-v"><span class="mono-inline">WORRD_AI_KEY</span> <span class="set-note">· 已读取，sk-••••3f9a</span></span>
+              <button class="btn">测试</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <p class="group-title">Spotlight 入口</p>
+          <div class="group-box">
+            <div class="set-row">
+              <span class="set-k">快捷指令</span>
+              <span class="set-v"><span class="ok">已安装「worrd」</span></span>
+              <button class="btn">在快捷指令中打开</button>
+            </div>
+            <div class="set-row">
+              <span class="set-k">用法</span>
+              <span class="set-v">⌘Space → worrd → 回车 → 输入或粘贴单词 → 回车</span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <p class="group-title">数据</p>
+          <div class="group-box">
+            <div class="set-row">
+              <span class="set-k">数据库</span>
+              <span class="set-v mono">~/Library/Application Support/Worrd/</span>
+              <button class="btn">在 Finder 中显示</button>
+            </div>
+            <div class="set-row">
+              <span class="set-k">导出</span>
+              <span class="set-v">128 词 · 143 次查询 · 1.2 MB</span>
+              <button class="btn">导出 CSV</button>
+            </div>
+          </div>
+        </div>
+        <p class="set-foot">Worrd 0.1 · 数据只保存在这台 Mac 上</p>
+      </div>
+    </div>
+    <p class="caption"><b>设置</b> · 720pt 宽 · 分组行式布局 · 只保留真正需要动的四项</p>
+  </section>
+
+  <!-- ================= FLOW ================= -->
+  <section class="view" id="view-flow">
+    <div class="flow">
+      <div class="step">
+        <span class="step-no">STEP 01</span>
+        <h3 class="step-t">复制或选中单词</h3>
+        <div class="mock">
+          <div style="width:100%">
+            <p class="sel-text">The <mark>theme</mark> of the essay is exile.</p>
+            <div class="keys"><kbd>⌘</kbd><kbd>C</kbd></div>
+          </div>
+        </div>
+        <p class="step-d">在浏览器、PDF 或任何 App 里照常复制，不需要先想好要查什么。</p>
+      </div>
+
+      <div class="step">
+        <span class="step-no">STEP 02</span>
+        <h3 class="step-t">呼出 Spotlight</h3>
+        <div class="mock">
+          <div style="width:100%">
+            <div class="spot">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+              Spotlight 搜索
+              <span class="caret"></span>
+            </div>
+            <div class="keys"><kbd>⌘</kbd><kbd>Space</kbd></div>
+          </div>
+        </div>
+        <p class="step-d">系统自带入口，不装第三方启动器，也不占全局快捷键。</p>
+      </div>
+
+      <div class="step">
+        <span class="step-no">STEP 03</span>
+        <h3 class="step-t">输入 worrd，回车</h3>
+        <div class="mock">
+          <div style="width:100%">
+            <div class="mini-row on"><span class="mini-ico">w</span> worrd <span class="k">查词</span></div>
+            <div class="mini-input">theme<span class="caret"></span></div>
+            <div class="keys" style="margin-top:6px">输入后按 <kbd>↵</kbd></div>
+          </div>
+        </div>
+        <p class="step-d">快捷指令的「Receive Input from Spotlight」把输入直接交给 Worrd。</p>
+      </div>
+
+      <div class="step">
+        <span class="step-no">STEP 04</span>
+        <h3 class="step-t">浮窗出结果</h3>
+        <div class="mock">
+          <div class="mini-panel">
+            <div class="mini-word">theme</div>
+            <div class="mini-phon">θiːm · 英</div>
+            <div class="mini-gloss">n. 主题 · 主旋律<br>v. 赋予…某种主题</div>
+            <div class="mini-ai">✔ 已加入单词本 · 第 3 次</div>
+          </div>
+        </div>
+        <p class="step-d">释义秒出；AI 补注在后台追加，不阻塞首屏。</p>
+      </div>
+    </div>
+    <p class="caption"><b>入口流程</b> · 复制 → ⌘Space → worrd → 词 → 结果 · 全程键盘，不离开当前工作</p>
+  </section>
+
+</main>
+
+<script>
+const $  = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+
+/* ---------------- view routing ---------------- */
+function setView(v){
+  document.body.dataset.view = v;
+  $$('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+  history.replaceState(null, '', '#' + v);
+}
+$$('.tabs button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+setView(location.hash.slice(1) || 'lookup');
+
+/* ---------------- theme ---------------- */
+const qs = new URLSearchParams(location.search);
+if (qs.get('theme') === 'dark') document.documentElement.dataset.theme = 'dark';
+$('#theme').addEventListener('click', () => {
+  const el = document.documentElement;
+  el.dataset.theme = el.dataset.theme === 'dark' ? 'light' : 'dark';
+});
+
+/* ---------------- popover states ---------------- */
+const panel = $('#panel');
+$$('#states button').forEach(b => {
+  b.addEventListener('click', () => {
+    panel.dataset.state = b.dataset.state;
+    $$('#states button').forEach(x => x.classList.toggle('on', x === b));
+  });
+});
+
+const qState = new URLSearchParams(location.search).get('state');
+if (qState) {
+  panel.dataset.state = qState;
+  $$('#states button').forEach(x => x.classList.toggle('on', x.dataset.state === qState));
+}
+
+/* ---------------- wordbook ---------------- */
+const WORDS = [
+  { w:'leverage', ipa:'ˈlevərɪdʒ', gloss:'利用；发挥…的作用', count:4, first:'10月3日', last:'今天 14:22',
+    senses:[['v.','利用（资源、关系）以达到目的；发挥…的作用'],['n.','影响力；杠杆作用']],
+    note:'技术文档高频。与 utilize 的区别：leverage 强调“借力”，常带杠杆或影响力的隐喻。' },
+  { w:'resilient', ipa:'rɪˈzɪliənt', gloss:'有韧性的；能迅速恢复的', count:5, first:'9月28日', last:'今天 09:05',
+    senses:[['adj.','（人）有韧性的，能屈能伸的'],['adj.','（系统、材料）有弹性的，能恢复原状的']],
+    note:'会议主题词。比 strong 更强调“受挫后恢复”。' },
+  { w:'serendipity', ipa:'ˌserənˈdɪpəti', gloss:'机缘凑巧；意外发现', count:1, first:'11月18日', last:'11月18日',
+    senses:[['n.','（不可数）机缘凑巧'],['n.','（可数）意外发现的好事']],
+    note:'' },
+  { w:'nuance', ipa:'ˈnjuːɑːns', gloss:'细微差别；微妙之处', count:2, first:'10月21日', last:'11月2日',
+    senses:[['n.','（意义、感受上的）细微差别'],['v.','使有细微差别']],
+    note:'写作时形容“语感差异”很好用：the nuance of the word。' },
+  { w:'ubiquitous', ipa:'juːˈbɪkwɪtəs', gloss:'无处不在的；普遍存在的', count:1, first:'11月9日', last:'11月9日',
+    senses:[['adj.','似乎无处不在的，十分普遍的']], note:'' },
+  { w:'paradigm', ipa:'ˈpærədaɪm', gloss:'范式；典范', count:2, first:'10月15日', last:'10月30日',
+    senses:[['n.','（学科或行业的）范式，理论框架'],['n.','典范，样板']],
+    note:'paradigm shift 是高频搭配：范式转变。' },
+  { w:'cultivate', ipa:'ˈkʌltɪveɪt', gloss:'培养；耕作', count:3, first:'10月8日', last:'11月20日',
+    senses:[['v.','培养（能力、关系、习惯）'],['v.','耕作，种植']],
+    note:'' },
+  { w:'explicit', ipa:'ɪkˈsplɪsɪt', gloss:'明确的；直言的', count:2, first:'10月11日', last:'今天 08:40',
+    senses:[['adj.','明确表达的，毫不含糊的'],['adj.','（内容）直白的，露骨的']], note:'' }
+];
+
+let current = 'leverage', sortMode = 'recent';
+
+function sorted(list){
+  const copy = [...list];
+  if (sortMode === 'count') return copy.sort((a,b) => b.count - a.count);
+  if (sortMode === 'alpha') return copy.sort((a,b) => a.w.localeCompare(b.w));
+  return copy;
+}
+
+function renderRows(){
+  const q = ($('#q')?.value || '').trim().toLowerCase();
+  const list = sorted(WORDS.filter(x =>
+    !q || x.w.includes(q) || x.gloss.includes(q) || (x.note || '').includes(q)
+  ));
+  $('#rows').innerHTML = list.map(x => `
+    <button class="row ${x.w === current ? 'on' : ''}" data-w="${x.w}">
+      <span class="row-top">
+        <span class="rw">${x.w}</span>
+        <span class="rc">${x.count > 1 ? '× ' + x.count : ''}</span>
+      </span>
+      <span class="rgloss">${x.gloss}</span>
+    </button>`).join('');
+  $$('#rows .row').forEach(r => r.addEventListener('click', () => {
+    current = r.dataset.w; renderRows(); renderDetail();
+  }));
+}
+
+function renderDetail(){
+  const x = WORDS.find(w => w.w === current);
+  $('#detail').innerHTML = `
+    <h2 class="d-word">${x.w}</h2>
+    <div class="d-phon">${x.ipa}
+      <button class="speak" aria-label="朗读"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="M15.5 8.5a4.5 4.5 0 0 1 0 7"/><path d="M18.5 6a8 8 0 0 1 0 12"/></svg></button>
+    </div>
+    <div class="d-meta"><span>已查 ${x.count} 次</span><span class="dot">·</span><span>首次 ${x.first}</span><span class="dot">·</span><span>最近 ${x.last}</span></div>
+    <div class="d-senses">
+      ${x.senses.map(s => `<div class="d-sense"><span class="pos">${s[0]}</span><p>${s[1]}</p></div>`).join('')}
+    </div>
+    <div class="d-note">
+      <span class="d-note-label">我的笔记</span>
+      <p>${x.note || '还没有笔记。双击这里可以写点什么。'}</p>
+    </div>
+    <div class="d-history">
+      <span class="d-note-label">查词记录</span>
+      <div class="h-row"><span class="h-t">${x.last}</span><span class="h-src">Spotlight</span></div>
+      ${x.count > 2 ? '<div class="h-row"><span class="h-t">10月29日 09:12</span><span class="h-src">终端</span></div>' : ''}
+      ${x.count > 1 ? `<div class="h-row"><span class="h-t">${x.first}</span><span class="h-src">快捷指令</span></div>` : ''}
+    </div>
+    <div class="d-actions">
+      <button class="btn">朗读</button>
+      <button class="btn">收藏</button>
+      <button class="btn danger">删除</button>
+    </div>`;
+}
+
+renderRows(); renderDetail();
+$('#q')?.addEventListener('input', renderRows);
+$('#sortBtn')?.addEventListener('click', () => {
+  sortMode = sortMode === 'recent' ? 'count' : sortMode === 'count' ? 'alpha' : 'recent';
+  $('#sortBtn').firstChild.textContent = sortMode === 'recent' ? '最近' : sortMode === 'count' ? '次数' : '字母';
+  renderRows();
+});
+
+/* ---------------- toggles ---------------- */
+$$('.switch').forEach(s => s.addEventListener('click', () => {
+  const on = !s.classList.contains('off');
+  s.classList.toggle('off', on);
+  s.setAttribute('aria-pressed', String(!on));
+}));
+</script>
+</body>
+</html>
